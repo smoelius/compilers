@@ -253,6 +253,21 @@ impl CompilerInput for MultiCompilerInput {
     }
 }
 
+struct EnterExit;
+
+impl Default for EnterExit {
+    fn default() -> Self {
+        eprintln!("Entering MultiCompiler::compile");
+        Self
+    }
+}
+
+impl Drop for EnterExit {
+    fn drop(&mut self) {
+        eprintln!("Exiting MultiCompiler::compile")
+    }
+}
+
 impl Compiler for MultiCompiler {
     type Input = MultiCompilerInput;
     type CompilationError = MultiCompilerError;
@@ -261,6 +276,8 @@ impl Compiler for MultiCompiler {
     type Language = MultiCompilerLanguage;
 
     fn compile(&self, input: &Self::Input) -> Result<CompilerOutput<Self::CompilationError>> {
+        let _enter_exit = EnterExit::default();
+
         match input {
             MultiCompilerInput::Solc(input) => {
                 if let Some(solc) = &self.solc {
