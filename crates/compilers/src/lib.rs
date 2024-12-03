@@ -190,6 +190,21 @@ where
     }
 }
 
+struct EnterExit;
+
+impl Default for EnterExit {
+    fn default() -> Self {
+        eprintln!("Entering Project::compile");
+        Self
+    }
+}
+
+impl Drop for EnterExit {
+    fn drop(&mut self) {
+        eprintln!("Exiting Project::compile")
+    }
+}
+
 impl<T: ArtifactOutput, C: Compiler> Project<C, T> {
     /// Returns the path to the artifacts directory
     pub fn artifacts_path(&self) -> &PathBuf {
@@ -264,6 +279,8 @@ impl<T: ArtifactOutput, C: Compiler> Project<C, T> {
     }
 
     pub fn compile(&self) -> Result<ProjectCompileOutput<C, T>> {
+        let _enter_exit = EnterExit::default();
+
         project::ProjectCompiler::new(self)?.compile()
     }
 
