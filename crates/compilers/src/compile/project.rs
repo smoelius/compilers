@@ -182,7 +182,15 @@ impl<'a, T: ArtifactOutput, C: Compiler> ProjectCompiler<'a, T, C> {
         let slash_paths = self.project.slash_paths;
 
         // drive the compiler statemachine to completion
-        let mut output = self.preprocess()?.compile()?.write_artifacts()?.write_cache()?;
+        let mut output = self.preprocess().inspect_err(|error| {
+            eprintln!("{}: {error:?}", line!())
+        })?.compile().inspect_err(|error| {
+            eprintln!("{}: {error:?}", line!())
+        })?.write_artifacts().inspect_err(|error| {
+            eprintln!("{}: {error:?}", line!())
+        })?.write_cache().inspect_err(|error| {
+            eprintln!("{}: {error:?}", line!())
+        })?;
 
         if slash_paths {
             // ensures we always use `/` paths
@@ -229,7 +237,9 @@ impl<'a, T: ArtifactOutput, C: Compiler> PreprocessedState<'a, T, C> {
         trace!("compiling");
         let PreprocessedState { sources, mut cache } = self;
 
-        let mut output = sources.compile(&mut cache)?;
+        let mut output = sources.compile(&mut cache).inspect_err(|error| {
+            eprintln!("{}: {error:?}", line!())
+        })?;
 
         // source paths get stripped before handing them over to solc, so solc never uses absolute
         // paths, instead `--base-path <root dir>` is set. this way any metadata that's derived from
@@ -461,10 +471,16 @@ impl<L: Language> CompilerSources<L> {
         }
 
         let results = if let Some(num_jobs) = jobs_cnt {
-            compile_parallel(&project.compiler, jobs, num_jobs)
+            compile_parallel(&project.compiler, jobs, num_jobs).inspect_err(|error| {
+                eprintln!("{}: {error:?}", line!())
+            })
         } else {
-            compile_sequential(&project.compiler, jobs)
-        }?;
+            compile_sequential(&project.compiler, jobs).inspect_err(|error| {
+                eprintln!("{}: {error:?}", line!())
+            })
+        }.inspect_err(|error| {
+            eprintln!("{}: {error:?}", line!())
+        })?;
 
         let mut aggregated = AggregatedCompilerOutput::default();
 
@@ -476,7 +492,9 @@ impl<L: Language> CompilerSources<L> {
                 cache.compiler_seen(file);
             }
 
-            let build_info = RawBuildInfo::new(&input, &output, project.build_info)?;
+            let build_info = RawBuildInfo::new(&input, &output, project.build_info).inspect_err(|error| {
+                eprintln!("{}: {error:?}", line!())
+            })?;
 
             output.retain_files(
                 actually_dirty
@@ -548,6 +566,8 @@ fn compile_parallel<C: Compiler>(
                         &start.elapsed(),
                     );
                     (input, output, actually_dirty)
+                }).inspect_err(|error| {
+                    eprintln!("{}: {error:?}", line!())
                 })
             })
             .collect()

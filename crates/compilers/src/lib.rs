@@ -281,7 +281,11 @@ impl<T: ArtifactOutput, C: Compiler> Project<C, T> {
     pub fn compile(&self) -> Result<ProjectCompileOutput<C, T>> {
         let _enter_exit = EnterExit::default();
 
-        project::ProjectCompiler::new(self)?.compile()
+        project::ProjectCompiler::new(self).inspect_err(|error| {
+            eprintln!("{}: {error:?}", line!())
+        })?.compile().inspect_err(|error| {
+            eprintln!("{}: {error:?}", line!())
+        })
     }
 
     /// Convenience function to compile a single solidity file with the project's settings.
