@@ -620,7 +620,7 @@ pub trait ArtifactOutput {
         let mut artifacts = self.output_to_artifacts(contracts, sources, ctx, layout);
         fs::create_dir_all(&layout.artifacts).map_err(|err| {
             error!(dir=?layout.artifacts, "Failed to create artifacts folder");
-            SolcIoError::new(err, &layout.artifacts)
+            SolcIoError::new(err, &layout.artifacts, file!(), line!())
         })?;
 
         artifacts.join_all(&layout.artifacts);
@@ -1110,7 +1110,7 @@ impl ArtifactOutput for MinimalCombinedArtifactsHardhatFallback {
     }
 
     fn read_cached_artifact(path: &Path) -> Result<Self::Artifact> {
-        let content = fs::read_to_string(path).map_err(|err| SolcError::io(err, path))?;
+        let content = fs::read_to_string(path).map_err(|err| SolcError::io(err, path, file!(), line!()))?;
         if let Ok(a) = serde_json::from_str(&content) {
             Ok(a)
         } else {

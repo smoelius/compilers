@@ -90,9 +90,9 @@ impl<T: ArtifactOutput> fmt::Debug for TempProject<MultiCompiler, T> {
 pub(crate) fn create_contract_file(path: &Path, content: impl AsRef<str>) -> Result<()> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)
-            .map_err(|err| SolcIoError::new(err, parent.to_path_buf()))?;
+            .map_err(|err| SolcIoError::new(err, parent.to_path_buf(), file!(), line!()))?;
     }
-    std::fs::write(path, content.as_ref()).map_err(|err| SolcIoError::new(err, path))?;
+    std::fs::write(path, content.as_ref()).map_err(|err| SolcIoError::new(err, path, file!(), line!()))?;
     Ok(())
 }
 
@@ -443,7 +443,7 @@ impl TempProject {
     pub fn checkout(repo: &str) -> Result<Self> {
         let tmp_dir = tempdir("tmp_checkout")?;
         clone_remote(&format!("https://github.com/{repo}"), tmp_dir.path())
-            .map_err(|err| SolcIoError::new(err, tmp_dir.path()))?;
+            .map_err(|err| SolcIoError::new(err, tmp_dir.path(), file!(), line!()))?;
         let paths = ProjectPathsConfig::dapptools(tmp_dir.path())?;
 
         let inner = Project::builder().paths(paths).build(Default::default())?;

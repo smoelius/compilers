@@ -597,7 +597,7 @@ impl ExtraOutputFiles {
             if let Some(abi) = abi {
                 let file = file.with_extension("abi.json");
                 fs::write(&file, serde_json::to_string_pretty(abi)?)
-                    .map_err(|err| SolcError::io(err, file))?
+                    .map_err(|err| SolcError::io(err, file, file!(), line!()))?
             }
         }
         Ok(())
@@ -608,7 +608,7 @@ impl ExtraOutputFiles {
             if let Some(metadata) = metadata {
                 let file = file.with_extension("metadata.json");
                 fs::write(&file, serde_json::to_string_pretty(metadata)?)
-                    .map_err(|err| SolcError::io(err, file))?
+                    .map_err(|err| SolcError::io(err, file, file!(), line!()))?
             }
         }
         Ok(())
@@ -618,7 +618,7 @@ impl ExtraOutputFiles {
         if self.ir {
             if let Some(ir) = ir {
                 let file = file.with_extension("ir");
-                fs::write(&file, ir).map_err(|err| SolcError::io(err, file))?
+                fs::write(&file, ir).map_err(|err| SolcError::io(err, file, file!(), line!()))?
             }
         }
         Ok(())
@@ -632,7 +632,7 @@ impl ExtraOutputFiles {
         if self.ir_optimized {
             if let Some(ir_optimized) = ir_optimized {
                 let file = file.with_extension("iropt");
-                fs::write(&file, ir_optimized).map_err(|err| SolcError::io(err, file))?
+                fs::write(&file, ir_optimized).map_err(|err| SolcError::io(err, file, file!(), line!()))?
             }
         }
         Ok(())
@@ -643,7 +643,7 @@ impl ExtraOutputFiles {
             if let Some(ewasm) = ewasm {
                 let file = file.with_extension("ewasm");
                 fs::write(&file, serde_json::to_vec_pretty(ewasm)?)
-                    .map_err(|err| SolcError::io(err, file))?;
+                    .map_err(|err| SolcError::io(err, file, file!(), line!()))?;
             }
         }
         Ok(())
@@ -653,7 +653,7 @@ impl ExtraOutputFiles {
         if self.assembly {
             if let Some(asm) = asm {
                 let file = file.with_extension("asm");
-                fs::write(&file, asm).map_err(|err| SolcError::io(err, file))?
+                fs::write(&file, asm).map_err(|err| SolcError::io(err, file, file!(), line!()))?
             }
         }
         Ok(())
@@ -668,7 +668,7 @@ impl ExtraOutputFiles {
             if let Some(generated_sources) = generated_sources {
                 let file = file.with_extension("gensources");
                 fs::write(&file, serde_json::to_vec_pretty(generated_sources)?)
-                    .map_err(|err| SolcError::io(err, file))?;
+                    .map_err(|err| SolcError::io(err, file, file!(), line!()))?;
             }
         }
         Ok(())
@@ -678,7 +678,7 @@ impl ExtraOutputFiles {
         if self.source_map {
             if let Some(source_map) = source_map {
                 let file = file.with_extension("sourcemap");
-                fs::write(&file, source_map).map_err(|err| SolcError::io(err, file))?
+                fs::write(&file, source_map).map_err(|err| SolcError::io(err, file, file!(), line!()))?
             }
         }
         Ok(())
@@ -693,7 +693,7 @@ impl ExtraOutputFiles {
             if let Some(bytecode) = bytecode {
                 let code = hex::encode(bytecode.as_ref());
                 let file = file.with_extension("bin");
-                fs::write(&file, code).map_err(|err| SolcError::io(err, file))?
+                fs::write(&file, code).map_err(|err| SolcError::io(err, file, file!(), line!()))?
             }
         }
         Ok(())
@@ -708,7 +708,7 @@ impl ExtraOutputFiles {
             if let Some(deployed) = deployed {
                 let code = hex::encode(deployed.as_ref());
                 let file = file.with_extension("deployed-bin");
-                fs::write(&file, code).map_err(|err| SolcError::io(err, file))?
+                fs::write(&file, code).map_err(|err| SolcError::io(err, file, file!(), line!()))?
             }
         }
         Ok(())

@@ -1,7 +1,6 @@
 use semver::Version;
 use std::{
-    io,
-    path::{Path, PathBuf},
+    io, path::{Path, PathBuf}
 };
 use thiserror::Error;
 
@@ -76,8 +75,8 @@ pub enum SolcError {
 }
 
 impl SolcError {
-    pub fn io(err: io::Error, path: impl Into<PathBuf>) -> Self {
-        SolcIoError::new(err, path).into()
+    pub fn io(err: io::Error, path: impl Into<PathBuf>, file: &'static str, line: u32) -> Self {
+        SolcIoError::new(err, path, file, line).into()
     }
 
     /// Create an error from the Solc executable's output.
@@ -105,11 +104,13 @@ impl SolcError {
 pub struct SolcIoError {
     io: io::Error,
     path: PathBuf,
+    file: &'static str,
+    line: u32,
 }
 
 impl SolcIoError {
-    pub fn new(io: io::Error, path: impl Into<PathBuf>) -> Self {
-        Self { io, path: path.into() }
+    pub fn new(io: io::Error, path: impl Into<PathBuf>, file: &'static str, line: u32) -> Self {
+        Self { io, path: path.into(), file, line }
     }
 
     /// The path at which the error occurred

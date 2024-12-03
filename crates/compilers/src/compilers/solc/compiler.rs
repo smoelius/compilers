@@ -300,7 +300,7 @@ impl Solc {
         version_path.push(format!("solc-{}", version.to_string().as_str()));
         trace!(target:"solc", "reading solc binary for checksum {:?}", version_path);
         let content =
-            std::fs::read(&version_path).map_err(|err| SolcError::io(err, version_path.clone()))?;
+            std::fs::read(&version_path).map_err(|err| SolcError::io(err, version_path.clone(), file!(), line!()))?;
 
         if !RELEASES.2 {
             // we skip checksum verification because the underlying request to fetch release info
@@ -436,7 +436,7 @@ impl Solc {
                 .stderr(Stdio::piped())
                 .stdout(Stdio::piped());
             debug!(?cmd, "getting Solc version");
-            let output = cmd.output().map_err(|e| SolcError::io(e, solc))?;
+            let output = cmd.output().map_err(|e| SolcError::io(e, solc, file!(), line!()))?;
             trace!(?output);
             let version = version_from_output(output)?;
             debug!(%version);
@@ -445,7 +445,7 @@ impl Solc {
     }
 
     fn map_io_err(&self) -> impl FnOnce(std::io::Error) -> SolcError + '_ {
-        move |err| SolcError::io(err, &self.solc)
+        move |err| SolcError::io(err, &self.solc, file!(), line!())
     }
 
     /// Configures [Command] object depeending on settings and solc version used.
@@ -543,7 +543,7 @@ impl Solc {
         let mut cmd = tokio::process::Command::new(solc);
         cmd.arg("--version").stdin(Stdio::piped()).stderr(Stdio::piped()).stdout(Stdio::piped());
         debug!(?cmd, "getting version");
-        let output = cmd.output().await.map_err(|e| SolcError::io(e, solc))?;
+        let output = cmd.output().await.map_err(|e| SolcError::io(e, solc, file!(), line!()))?;
         let version = version_from_output(output)?;
         debug!(%version);
         Ok(version)

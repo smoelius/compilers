@@ -244,7 +244,7 @@ pub fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf, SolcIoError> {
         use path_slash::PathBufExt;
         PathBuf::from(p.to_slash_lossy().as_ref())
     });
-    res.map_err(|err| SolcIoError::new(err, path))
+    res.map_err(|err| SolcIoError::new(err, path, file!(), line!()))
 }
 
 /// Returns a normalized Solidity file path for the given import path based on the specified
@@ -268,7 +268,7 @@ pub fn normalize_solidity_import_path(
     let normalized = PathBuf::from(dunce::simplified(&cleaned).to_slash_lossy().as_ref());
 
     // checks if the path exists without reading its content and obtains an io error if it doesn't.
-    normalized.metadata().map(|_| normalized).map_err(|err| SolcIoError::new(err, original))
+    normalized.metadata().map(|_| normalized).map_err(|err| SolcIoError::new(err, original, file!(), line!()))
 }
 
 // This function lexically cleans the given path.
@@ -582,14 +582,14 @@ cfg_if! {
 /// Creates a new named tempdir.
 #[cfg(any(test, feature = "project-util", feature = "test-utils"))]
 pub fn tempdir(name: &str) -> Result<tempfile::TempDir, SolcIoError> {
-    tempfile::Builder::new().prefix(name).tempdir().map_err(|err| SolcIoError::new(err, name))
+    tempfile::Builder::new().prefix(name).tempdir().map_err(|err| SolcIoError::new(err, name, file!(), line!()))
 }
 
 /// Reads the json file and deserialize it into the provided type.
 pub fn read_json_file<T: DeserializeOwned>(path: &Path) -> Result<T, SolcError> {
     // See: https://github.com/serde-rs/json/issues/160
-    let file = fs::File::open(path).map_err(|err| SolcError::io(err, path))?;
-    let bytes = unsafe { memmap2::Mmap::map(&file).map_err(|err| SolcError::io(err, path))? };
+    let file = fs::File::open(path).map_err(|err| SolcError::io(err, path, file!(), line!()))?;
+    let bytes = unsafe { memmap2::Mmap::map(&file).map_err(|err| SolcError::io(err, path, file!(), line!()))? };
     serde_json::from_slice(&bytes).map_err(Into::into)
 }
 
@@ -599,10 +599,10 @@ pub fn write_json_file<T: Serialize>(
     path: &Path,
     capacity: usize,
 ) -> Result<(), SolcError> {
-    let file = fs::File::create(path).map_err(|err| SolcError::io(err, path))?;
+    let file = fs::File::create(path).map_err(|err| SolcError::io(err, path, file!(), line!()))?;
     let mut writer = std::io::BufWriter::with_capacity(capacity, file);
     serde_json::to_writer(&mut writer, value)?;
-    writer.flush().map_err(|e| SolcError::io(e, path))
+    writer.flush().map_err(|e| SolcError::io(e, path, file!(), line!()))
 }
 
 /// Creates the parent directory of the `file` and all its ancestors if it does not exist.

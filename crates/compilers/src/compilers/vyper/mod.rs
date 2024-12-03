@@ -173,7 +173,7 @@ impl Vyper {
                 .stderr(Stdio::piped())
                 .stdout(Stdio::piped());
             debug!(?cmd, "getting Vyper version");
-            let output = cmd.output().map_err(|e| SolcError::io(e, vyper))?;
+            let output = cmd.output().map_err(|e| SolcError::io(e, vyper, file!(), line!()))?;
             trace!(?output);
             if output.status.success() {
                 let stdout = String::from_utf8_lossy(&output.stdout);
@@ -185,7 +185,7 @@ impl Vyper {
     }
 
     fn map_io_err(&self) -> impl FnOnce(std::io::Error) -> SolcError + '_ {
-        move |err| SolcError::io(err, &self.path)
+        move |err| SolcError::io(err, &self.path, file!(), line!())
     }
 }
 

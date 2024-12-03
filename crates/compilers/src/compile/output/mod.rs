@@ -605,13 +605,13 @@ impl<C: Compiler> AggregatedCompilerOutput<C> {
             return Ok(());
         }
         std::fs::create_dir_all(build_info_dir)
-            .map_err(|err| SolcIoError::new(err, build_info_dir))?;
+            .map_err(|err| SolcIoError::new(err, build_info_dir, file!(), line!()))?;
         for build_info in &self.build_infos {
             trace!("writing build info file {}", build_info.id);
             let file_name = format!("{}.json", build_info.id);
             let file = build_info_dir.join(file_name);
             std::fs::write(&file, &serde_json::to_string(build_info)?)
-                .map_err(|err| SolcIoError::new(err, file))?;
+                .map_err(|err| SolcIoError::new(err, file, file!(), line!()))?;
         }
         Ok(())
     }

@@ -241,12 +241,12 @@ impl<L> ProjectPathsConfig<L> {
 
     /// Creates a new config with the current directory as the root
     pub fn current_hardhat() -> Result<Self> {
-        Self::hardhat(&std::env::current_dir().map_err(|err| SolcError::io(err, "."))?)
+        Self::hardhat(&std::env::current_dir().map_err(|err| SolcError::io(err, ".", file!(), line!()))?)
     }
 
     /// Creates a new config with the current directory as the root
     pub fn current_dapptools() -> Result<Self> {
-        Self::dapptools(&std::env::current_dir().map_err(|err| SolcError::io(err, "."))?)
+        Self::dapptools(&std::env::current_dir().map_err(|err| SolcError::io(err, ".", file!(), line!()))?)
     }
 
     /// Returns a new [ProjectPaths] instance that contains all directories configured for this
@@ -274,15 +274,15 @@ impl<L> ProjectPathsConfig<L> {
     /// Creates all configured dirs and files
     pub fn create_all(&self) -> std::result::Result<(), SolcIoError> {
         if let Some(parent) = self.cache.parent() {
-            fs::create_dir_all(parent).map_err(|err| SolcIoError::new(err, parent))?;
+            fs::create_dir_all(parent).map_err(|err| SolcIoError::new(err, parent, file!(), line!()))?;
         }
         fs::create_dir_all(&self.artifacts)
-            .map_err(|err| SolcIoError::new(err, &self.artifacts))?;
-        fs::create_dir_all(&self.sources).map_err(|err| SolcIoError::new(err, &self.sources))?;
-        fs::create_dir_all(&self.tests).map_err(|err| SolcIoError::new(err, &self.tests))?;
-        fs::create_dir_all(&self.scripts).map_err(|err| SolcIoError::new(err, &self.scripts))?;
+            .map_err(|err| SolcIoError::new(err, &self.artifacts, file!(), line!()))?;
+        fs::create_dir_all(&self.sources).map_err(|err| SolcIoError::new(err, &self.sources, file!(), line!()))?;
+        fs::create_dir_all(&self.tests).map_err(|err| SolcIoError::new(err, &self.tests, file!(), line!()))?;
+        fs::create_dir_all(&self.scripts).map_err(|err| SolcIoError::new(err, &self.scripts, file!(), line!()))?;
         for lib in &self.libraries {
-            fs::create_dir_all(lib).map_err(|err| SolcIoError::new(err, lib))?;
+            fs::create_dir_all(lib).map_err(|err| SolcIoError::new(err, lib, file!(), line!()))?;
         }
         Ok(())
     }
@@ -884,7 +884,7 @@ impl ProjectPathsConfigBuilder {
             .clone()
             .map(Ok)
             .unwrap_or_else(std::env::current_dir)
-            .map_err(|err| SolcIoError::new(err, "."))?;
+            .map_err(|err| SolcIoError::new(err, ".", file!(), line!()))?;
         Ok(self.build_with_root(root))
     }
 }

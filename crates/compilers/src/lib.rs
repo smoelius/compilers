@@ -347,19 +347,19 @@ impl<T: ArtifactOutput, C: Compiler> Project<C, T> {
         trace!("clean up project");
         if self.cache_path().exists() {
             std::fs::remove_file(self.cache_path())
-                .map_err(|err| SolcIoError::new(err, self.cache_path()))?;
+                .map_err(|err| SolcIoError::new(err, self.cache_path(), file!(), line!()))?;
             if let Some(cache_folder) =
                 self.cache_path().parent().filter(|cache_folder| self.root() != cache_folder)
             {
                 // remove the cache folder if the cache file was the only file
                 if cache_folder
                     .read_dir()
-                    .map_err(|err| SolcIoError::new(err, cache_folder))?
+                    .map_err(|err| SolcIoError::new(err, cache_folder, file!(), line!()))?
                     .next()
                     .is_none()
                 {
                     std::fs::remove_dir(cache_folder)
-                        .map_err(|err| SolcIoError::new(err, cache_folder))?;
+                        .map_err(|err| SolcIoError::new(err, cache_folder, file!(), line!()))?;
                 }
             }
             trace!("removed cache file \"{}\"", self.cache_path().display());
@@ -368,14 +368,14 @@ impl<T: ArtifactOutput, C: Compiler> Project<C, T> {
         // clean the artifacts dir
         if self.artifacts_path().exists() && self.root() != self.artifacts_path() {
             std::fs::remove_dir_all(self.artifacts_path())
-                .map_err(|err| SolcIoError::new(err, self.artifacts_path().clone()))?;
+                .map_err(|err| SolcIoError::new(err, self.artifacts_path().clone(), file!(), line!()))?;
             trace!("removed artifacts dir \"{}\"", self.artifacts_path().display());
         }
 
         // also clean the build-info dir, in case it's not nested in the artifacts dir
         if self.build_info_path().exists() && self.root() != self.build_info_path() {
             std::fs::remove_dir_all(self.build_info_path())
-                .map_err(|err| SolcIoError::new(err, self.build_info_path().clone()))?;
+                .map_err(|err| SolcIoError::new(err, self.build_info_path().clone(), file!(), line!()))?;
             tracing::trace!("removed build-info dir \"{}\"", self.build_info_path().display());
         }
 
@@ -424,7 +424,7 @@ impl<T: ArtifactOutput, C: Compiler> Project<C, T> {
         let mut contracts: HashMap<String, Vec<PathBuf>> = HashMap::new();
 
         for file in graph.files().keys() {
-            let src = fs::read_to_string(file).map_err(|e| SolcError::io(e, file))?;
+            let src = fs::read_to_string(file).map_err(|e| SolcError::io(e, file, file!(), line!()))?;
             let Ok((parsed, _)) = solang_parser::parse(&src, 0) else {
                 return self.collect_contract_names_solc();
             };

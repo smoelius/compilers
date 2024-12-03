@@ -348,7 +348,7 @@ impl<S: CompilerSettings> CompilerCache<S> {
 
     pub async fn async_write(&self, path: &Path) -> Result<()> {
         let content = serde_json::to_vec(self)?;
-        tokio::fs::write(path, content).await.map_err(|err| SolcError::io(err, path))
+        tokio::fs::write(path, content).await.map_err(|err| SolcError::io(err, path, file!(), line!()))
     }
 
     async fn asyncify<F, T>(f: F) -> Result<T>
@@ -361,6 +361,8 @@ impl<S: CompilerSettings> CompilerCache<S> {
             Err(_) => Err(SolcError::io(
                 std::io::Error::new(std::io::ErrorKind::Other, "background task failed"),
                 "",
+                file!(),
+                line!(),
             )),
         }
     }
@@ -462,9 +464,9 @@ impl<S> CacheEntry<S> {
     /// Reads the last modification date from the file's metadata
     pub fn read_last_modification_date(file: &Path) -> Result<u64> {
         let last_modification_date = fs::metadata(file)
-            .map_err(|err| SolcError::io(err, file.to_path_buf()))?
+            .map_err(|err| SolcError::io(err, file.to_path_buf(), file!(), line!()))?
             .modified()
-            .map_err(|err| SolcError::io(err, file.to_path_buf()))?
+            .map_err(|err| SolcError::io(err, file.to_path_buf(), file!(), line!()))?
             .duration_since(UNIX_EPOCH)
             .map_err(SolcError::msg)?
             .as_millis() as u64;

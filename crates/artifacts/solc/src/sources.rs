@@ -126,7 +126,7 @@ impl Source {
     #[instrument(name = "read_source", level = "debug", skip_all, err)]
     pub fn read(file: &Path) -> Result<Self, SolcIoError> {
         trace!(file=%file.display());
-        let mut content = fs::read_to_string(file).map_err(|err| SolcIoError::new(err, file))?;
+        let mut content = fs::read_to_string(file).map_err(|err| SolcIoError::new(err, file, file!(), line!()))?;
 
         // Normalize line endings to ensure deterministic metadata.
         if content.contains('\r') {
@@ -206,7 +206,7 @@ impl Source {
     #[instrument(name = "async_read_source", level = "debug", skip_all, err)]
     pub async fn async_read(file: &Path) -> Result<Self, SolcIoError> {
         let mut content =
-            tokio::fs::read_to_string(file).await.map_err(|err| SolcIoError::new(err, file))?;
+            tokio::fs::read_to_string(file).await.map_err(|err| SolcIoError::new(err, file, file!(), line!()))?;
 
         // Normalize line endings to ensure deterministic metadata.
         if content.contains('\r') {
