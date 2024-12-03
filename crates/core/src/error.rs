@@ -1,7 +1,6 @@
 use semver::Version;
 use std::{
-    io,
-    path::{Path, PathBuf},
+    backtrace::Backtrace, io, path::{Path, PathBuf}
 };
 use thiserror::Error;
 
@@ -105,11 +104,16 @@ impl SolcError {
 pub struct SolcIoError {
     io: io::Error,
     path: PathBuf,
+    bt: Bt,
 }
+
+#[allow(unused)]
+#[derive(Debug)]
+struct Bt(Backtrace);
 
 impl SolcIoError {
     pub fn new(io: io::Error, path: impl Into<PathBuf>) -> Self {
-        Self { io, path: path.into() }
+        Self { io, path: path.into(), bt: Bt(Backtrace::force_capture()) }
     }
 
     /// The path at which the error occurred
