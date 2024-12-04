@@ -402,6 +402,8 @@ impl Solc {
     /// Compiles with `--standard-json` and returns the raw `stdout` output.
     #[instrument(name = "compile", level = "debug", skip_all)]
     pub fn compile_output<T: Serialize>(&self, input: &T) -> Result<Vec<u8>> {
+        eprintln!("{}", std::backtrace::Backtrace::force_capture());
+
         let mut cmd = self.configure_cmd();
 
         trace!(input=%serde_json::to_string(input).unwrap_or_else(|e| e.to_string()));
